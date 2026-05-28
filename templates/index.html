@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AI Spec Writer</title>
+    <style>
+      :root {
+        --navy: #1a2e4a;
+        --accent: #2d7dd2;
+        --border: #d9e2ec;
+        --surface: #ffffff;
+        --surface-soft: #f5f8fc;
+        --text: #1d2a3a;
+        --muted: #5d6b7b;
+        --danger-bg: #fff3f1;
+        --danger-text: #8f2d20;
+        --shadow: 0 22px 60px rgba(26, 46, 74, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(45, 125, 210, 0.12), transparent 35%),
+          linear-gradient(180deg, #ffffff 0%, #f3f7fb 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 32px 16px;
+      }
+
+      .card {
+        width: min(100%, 600px);
+        background: var(--surface);
+        border: 1px solid rgba(26, 46, 74, 0.08);
+        border-radius: 20px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .card-header {
+        padding: 32px 32px 20px;
+        background: linear-gradient(135deg, rgba(26, 46, 74, 0.98), rgba(38, 69, 112, 0.95));
+        color: #ffffff;
+      }
+
+      .eyebrow {
+        margin: 0 0 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 0.78rem;
+        opacity: 0.78;
+      }
+
+      h1 {
+        margin: 0 0 10px;
+        font-size: clamp(2rem, 4vw, 2.6rem);
+        line-height: 1.05;
+      }
+
+      .intro {
+        margin: 0;
+        font-size: 1rem;
+        line-height: 1.65;
+        max-width: 46ch;
+        color: rgba(255, 255, 255, 0.88);
+      }
+
+      form {
+        padding: 28px 32px 32px;
+        background: var(--surface);
+      }
+
+      .error {
+        margin-bottom: 18px;
+        padding: 14px 16px;
+        border-radius: 14px;
+        background: var(--danger-bg);
+        color: var(--danger-text);
+        border: 1px solid rgba(143, 45, 32, 0.12);
+        font-size: 0.96rem;
+      }
+
+      .field {
+        margin-bottom: 18px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 700;
+        color: var(--navy);
+      }
+
+      .hint {
+        margin: 6px 0 0;
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+
+      input,
+      textarea {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--surface-soft);
+        color: var(--text);
+        padding: 13px 14px;
+        font: inherit;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+      }
+
+      textarea {
+        min-height: 120px;
+        resize: vertical;
+      }
+
+      input:focus,
+      textarea:focus {
+        outline: none;
+        border-color: var(--accent);
+        background: #ffffff;
+        box-shadow: 0 0 0 4px rgba(45, 125, 210, 0.12);
+      }
+
+      .actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-top: 6px;
+      }
+
+      .helper-copy {
+        margin: 0;
+        font-size: 0.92rem;
+        color: var(--muted);
+        max-width: 28ch;
+      }
+
+      button {
+        border: none;
+        border-radius: 999px;
+        padding: 14px 22px;
+        background: linear-gradient(135deg, #2d7dd2, #2265ae);
+        color: #ffffff;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 14px 28px rgba(45, 125, 210, 0.24);
+        transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+      }
+
+      button:hover:enabled {
+        transform: translateY(-1px);
+        box-shadow: 0 18px 30px rgba(45, 125, 210, 0.3);
+      }
+
+      button:disabled {
+        cursor: wait;
+        opacity: 0.9;
+      }
+
+      .loading-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.85);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+
+      .loading-panel {
+        min-width: min(100%, 320px);
+        padding: 28px 24px;
+        background: #ffffff;
+        border: 1px solid rgba(26, 46, 74, 0.08);
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+        text-align: center;
+      }
+
+      .loading-panel p {
+        margin: 12px 0 0;
+        color: var(--navy);
+        font-weight: 600;
+      }
+
+      .spinner,
+      .button-spinner {
+        display: inline-block;
+        border-radius: 999px;
+        border: 3px solid rgba(45, 125, 210, 0.2);
+        border-top-color: var(--accent);
+        animation: spin 0.9s linear infinite;
+      }
+
+      .spinner {
+        width: 34px;
+        height: 34px;
+      }
+
+      .button-spinner {
+        width: 16px;
+        height: 16px;
+      }
+
+      .button-content {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media (max-width: 640px) {
+        .card-header,
+        form {
+          padding-left: 20px;
+          padding-right: 20px;
+        }
+
+        .actions {
+          align-items: stretch;
+        }
+
+        button {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <section class="card-header">
+        <p class="eyebrow">AI-Powered Engineering Documentation</p>
+        <h1>AI Spec Writer</h1>
+        <p class="intro">
+          Turn early product details into a polished, professional engineering specification
+          with sections your manufacturing and quality teams can use immediately.
+        </p>
+      </section>
+
+      <form action="{{ url_for('generate') }}" method="post" data-spec-form>
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+
+        <div class="field">
+          <label for="part_name">Part/Product Name</label>
+          <input id="part_name" name="part_name" type="text" required value="{{ form_data.get('part_name', '') }}">
+        </div>
+
+        <div class="field">
+          <label for="description">Description</label>
+          <textarea id="description" name="description" placeholder="What the part does, where it is used, and why it matters.">{{ form_data.get('description', '') }}</textarea>
+        </div>
+
+        <div class="field">
+          <label for="dimensions">Key Dimensions</label>
+          <textarea id="dimensions" name="dimensions" placeholder="Rough sizes, fit constraints, mounting requirements, or envelope limitations.">{{ form_data.get('dimensions', '') }}</textarea>
+        </div>
+
+        <div class="field">
+          <label for="materials">Material Preferences</label>
+          <input id="materials" name="materials" type="text" value="{{ form_data.get('materials', '') }}" placeholder="Optional hints such as stainless steel, ABS, titanium, or carbon fiber.">
+        </div>
+
+        <div class="field">
+          <label for="industry">Industry / Application</label>
+          <input id="industry" name="industry" type="text" value="{{ form_data.get('industry', '') }}" placeholder="Examples: aerospace, medical, industrial automation, consumer products">
+        </div>
+
+        <div class="field">
+          <label for="requirements">Special Requirements</label>
+          <textarea id="requirements" name="requirements" placeholder="Environmental, compliance, cleanliness, performance, packaging, or safety requirements.">{{ form_data.get('requirements', '') }}</textarea>
+          <p class="hint">Optional, but useful for tighter manufacturing and quality guidance.</p>
+        </div>
+
+        <div class="actions">
+          <p class="helper-copy">The generated specification is also saved for plain text download.</p>
+          <button type="submit" data-submit-button>
+            <span class="button-content">Generate Specification</span>
+          </button>
+        </div>
+      </form>
+    </main>
+
+    <div class="loading-overlay" hidden data-loading-overlay>
+      <div class="loading-panel" role="status" aria-live="polite">
+        <div class="spinner" aria-hidden="true"></div>
+        <p>Generating technical specification...</p>
+      </div>
+    </div>
+
+    <script>
+      const form = document.querySelector("[data-spec-form]");
+      const overlay = document.querySelector("[data-loading-overlay]");
+      const submitButton = document.querySelector("[data-submit-button]");
+
+      if (form && overlay && submitButton) {
+        form.addEventListener("submit", () => {
+          overlay.hidden = false;
+          submitButton.disabled = true;
+          submitButton.innerHTML = '<span class="button-content"><span class="button-spinner" aria-hidden="true"></span><span>Generating...</span></span>';
+        });
+      }
+    </script>
+  </body>
+</html>
